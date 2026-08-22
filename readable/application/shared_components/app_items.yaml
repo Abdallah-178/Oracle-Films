@@ -1,0 +1,14 @@
+---
+- # ====== Application Item: USER_ID ===========================
+  id: 35431513697654520
+  identification: 
+    name: USER_ID
+    scope: Application
+
+  security: 
+    session-state-protection: Restricted - May not be set from browser
+    escape-special-characters: true
+
+  subscription: 
+    version-number: 72374162
+

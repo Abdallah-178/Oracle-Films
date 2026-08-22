@@ -1,0 +1,552 @@
+---
+# ====== Page: Movie Search ==================================
+id: 2
+identification: 
+  name: Movie Search
+  alias: MOVIE-SEARCH
+  title: Movie Search
+
+appearance: 
+  page-mode: Normal
+  page-template: Theme Default
+  template-options: 
+  - '#DEFAULT#'
+
+navigation-menu: 
+  override-user-interface-level: false
+
+navigation: 
+  cursor-focus: First item on page
+  warn-on-unsaved-changes: false
+
+css: 
+  inline: |
+    /* Set posters to be the same size/ratio */
+    .a-CardView-media--square:before {
+        padding-top: 150%; /* 2:3 ratio */
+    }
+    
+    /* set position of the Card badge */
+    .a-CardView-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        margin: 0;
+    }
+    
+    /* style the movie rating under the movie title */
+        .movie-rating {
+        margin-top: 4px;
+    }
+    
+    /* style both the movie rating and the star icon under the movie title */
+    .movie-rating,
+    .movie-rating .fa {
+        font-size: 12px;
+        line-height: inherit;
+        vertical-align: bottom;
+        opacity: 0.75;
+    }
+
+security: 
+  authentication: Page Requires Authentication
+  deep-linking: Application Default
+  page-access-protection: Arguments Must Have Checksum
+  form-auto-complete: Off
+  browser-cache: Application Default
+
+session-management: 
+  rejoin-sessions: Application Default
+
+advanced: 
+  enable-duplicate-page-submissions: Yes - Enable page to be re-posted
+  reload-on-submit: Only for Success
+
+server-cache: 
+  caching: Disabled
+
+regions: 
+- # ====== Region: Popular Movies ==============================
+  id: 34971767335057922
+  identification: 
+    name: Popular Movies
+    type: Cards
+
+  source: 
+    location: REST Source
+    rest-source: Popular Movies # 35252385959233917
+
+  local-post-processing: 
+    type: SQL Query
+    sql-query: |
+      select ads.id,
+             ads.adult,
+             ads.title,
+             ads.video,
+             ads.overview,
+             ads.popularity,
+             ads.vote_count,
+             ads.poster_path,
+             ads.release_date,
+             ads.vote_average,
+             ads.backdrop_path,
+             ads.original_title,
+             ads.original_language,
+             case when w.watched_yn = 'Y' then 'Watched'
+                  when w.watched_yn = 'N' then 'Added'
+                  end as badge_label,
+             case when w.watched_yn = 'N' then 'u-success'
+                  end as badge_color
+        from #APEX$SOURCE_DATA# ads
+      LEFT OUTER JOIN
+          -- doing inline select to limit rows to current user
+          (select * from watchlist where user_id = :USER_ID) w
+          ON w.movie_id = ads.ID
+      
+      
+
+  layout: 
+    sequence: 10
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Cards Container
+    template-options: 
+    - '#DEFAULT#'
+    - t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  server-side-condition: 
+    type: Item is NULL
+    item: P2_SEARCH
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  parameters: 
+  - # ====== Parameter: language =================================
+    id: 34973804623057943
+    identification: 
+      name: language # 35253043463233917
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: REST Source Default
+
+  - # ====== Parameter: page =====================================
+    id: 34973950379057944
+    identification: 
+      name: page # 35253423066233917
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: REST Source Default
+
+  attributes: 
+    id: 34971835879057923
+    appearance: 
+      layout: Grid
+      grid-columns: 5 Columns
+
+    card: 
+      primary-key-column-1: ID
+
+    title: 
+      advanced-formatting: false
+
+    subtitle: 
+      advanced-formatting: true
+      html-expression: |
+        <div class="movie-rating">
+        <span aria-hidden="true" class="fa fa-star"></span> &VOTE_AVERAGE.</div>
+        
+
+    body: 
+      advanced-formatting: false
+
+    secondary-body: 
+      advanced-formatting: false
+
+    icon-and-badge: 
+      icon-source: No Icon
+      badge-column: BADGE_LABEL
+      badge-css-classes: 
+      - '&BADGE_COLOR.'
+
+    media: 
+      advanced-formatting: false
+      source: Image URL
+      url: 'https://image.tmdb.org/t/p/w500&POSTER_PATH.'
+      position: First
+      appearance: Square
+      sizing: Cover
+
+    performance: 
+      lazy-loading: false
+
+    pagination: 
+      type: Scroll
+      show-total-count: true
+
+    actions: 
+    - # ====== Action: Full Card ===================================
+      id: 35403976607955118
+      identification: 
+        type: Full Card
+
+      layout: 
+        sequence: 10
+
+      link: 
+        type: Redirect to Page in this Application
+        target: 
+          url: 'f?p=&APP_ID.:3:&SESSION.::&DEBUG.::P3_ID,P3_PREVIOUS_PAGE_ID:&ID.,2'
+          page: 3 # Movie Details
+          values: 
+            p3_id: '&ID.'
+            p3_previous_page_id: 2
+
+- # ====== Region: Searched Movies =============================
+  id: 34972164607057926
+  identification: 
+    name: Searched Movies
+    type: Cards
+
+  source: 
+    location: REST Source
+    rest-source: Search Movies # 35257938512233921
+
+  local-post-processing: 
+    type: SQL Query
+    sql-query: |
+      select ads.id,
+             ads.adult,
+             ads.title,
+             ads.video,
+             ads.overview,
+             ads.popularity,
+             ads.vote_count,
+             ads.poster_path,
+             ads.release_date,
+             ads.vote_average,
+             ads.backdrop_path,
+             ads.original_title,
+             ads.original_language,
+             case when w.watched_yn = 'Y' then 'Watched'
+                  when w.watched_yn = 'N' then 'Added'
+                  end as badge_label,
+             case when w.watched_yn = 'N' then 'u-success'
+                  end as badge_color
+        from #APEX$SOURCE_DATA# ads
+      LEFT OUTER JOIN
+          -- doing inline select to limit rows to current user
+          (select * from watchlist where user_id = :USER_ID) w
+          ON w.movie_id = ads.ID
+
+  layout: 
+    sequence: 20
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Cards Container
+    template-options: 
+    - '#DEFAULT#'
+    - t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  server-side-condition: 
+    type: Item is NOT NULL
+    item: P2_SEARCH
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  parameters: 
+  - # ====== Parameter: include_adult ============================
+    id: 34973544774057940
+    identification: 
+      name: include_adult # 35259488429233923
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: REST Source Default
+
+  - # ====== Parameter: language =================================
+    id: 34973682488057941
+    identification: 
+      name: language # 35258623341233923
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: REST Source Default
+
+  - # ====== Parameter: query ====================================
+    id: 34973749694057942
+    identification: 
+      name: query # 35259079602233923
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: Item
+      item: P2_SEARCH
+
+  - # ====== Parameter: include_adult ============================
+    id: 34974066894057945
+    identification: 
+      name: include_adult # 35259488429233923
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: REST Source Default
+
+  - # ====== Parameter: language =================================
+    id: 34974166920057946
+    identification: 
+      name: language # 35258623341233923
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: REST Source Default
+
+  - # ====== Parameter: query ====================================
+    id: 34974222580057947
+    identification: 
+      name: query # 35259079602233923
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: REST Source Default
+
+  attributes: 
+    id: 34972439411057929
+    appearance: 
+      layout: Grid
+      grid-columns: 5 Columns
+
+    card: 
+      primary-key-column-1: ID
+
+    title: 
+      advanced-formatting: false
+
+    subtitle: 
+      advanced-formatting: true
+      html-expression: |
+        <div class="movie-rating">
+        <span aria-hidden="true" class="fa fa-star"></span> &VOTE_AVERAGE.</div>
+        
+
+    body: 
+      advanced-formatting: false
+
+    secondary-body: 
+      advanced-formatting: false
+
+    icon-and-badge: 
+      icon-source: No Icon
+      badge-column: BADGE_LABEL
+      badge-css-classes: 
+      - '&BADGE_COLOR.'
+
+    media: 
+      advanced-formatting: false
+      source: Image URL
+      url: 'https://image.tmdb.org/t/p/w500&POSTER_PATH.'
+      position: First
+      appearance: Square
+      sizing: Cover
+
+    performance: 
+      lazy-loading: false
+
+    pagination: 
+      type: Page
+      show-total-count: false
+      cards-per-page: 25
+
+- # ====== Region: Search Bar ==================================
+  id: 34972884718057933
+  identification: 
+    name: Search Bar
+    type: Static Content
+
+  layout: 
+    sequence: 10
+    parent-region: No Parent
+    slot: REGION_POSITION_01
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Blank with Attributes
+    template-options: 
+    - '#DEFAULT#'
+    css-classes: 
+    - padding-sm
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: HTML
+      expand-shortcuts: false
+
+page-items: 
+- # ====== Page Item: P2_SEARCH ================================
+  id: 34972946185057934
+  identification: 
+    name: P2_SEARCH
+    type: Text Field
+
+  label: 
+    label: Search
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 10
+    region: Search Bar # 34972884718057933
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Hidden
+    template-options: 
+    - '#DEFAULT#'
+    - js-hidePasswordVisibility
+    - t-Form-fieldContainer--stretchInputs
+    - t-Form-fieldContainer--xlarge
+    icon: fa-search
+    width: 30
+    value-placeholder: Search for a movie…
+
+  validation: 
+    value-required: false
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    type: Null
+    used: Only when current value in session state is null
+
+  session-state: 
+    storage: Per Session (Persistent)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+

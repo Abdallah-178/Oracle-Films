@@ -1,0 +1,1434 @@
+---
+# ====== Page: Movie Details =================================
+id: 3
+identification: 
+  name: Movie Details
+  alias: MOVIE-DETAILS
+  title: Movie Details
+
+appearance: 
+  page-mode: Modal Dialog
+  dialog-template: Theme Default
+  template-options: 
+  - '#DEFAULT#'
+  - ui-dialog--stretch
+
+dialog: 
+  chained: true
+  resizable: true
+
+navigation-menu: 
+  override-user-interface-level: false
+
+navigation: 
+  cursor-focus: Do not focus cursor
+  warn-on-unsaved-changes: true
+
+security: 
+  authentication: Page Requires Authentication
+  deep-linking: Application Default
+  page-access-protection: Arguments Must Have Checksum
+  form-auto-complete: Off
+  browser-cache: Application Default
+
+session-management: 
+  rejoin-sessions: Application Default
+
+advanced: 
+  enable-duplicate-page-submissions: Yes - Enable page to be re-posted
+  reload-on-submit: Only for Success
+
+server-cache: 
+  caching: Disabled
+
+regions: 
+- # ====== Region: Movie Details ===============================
+  id: 35384207287944478
+  identification: 
+    name: Movie Details
+    type: Form
+
+  source: 
+    location: REST Source
+    rest-source: Movie Details # 35247269302233910
+
+  layout: 
+    sequence: 10
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Blank with Attributes
+    template-options: 
+    - '#DEFAULT#'
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    edit: 
+      enabled: true
+      allowed-operations: 
+      - Add Row
+      - Update Row
+      - Delete Row
+      lost-update-type: Row Values
+
+  parameters: 
+  - # ====== Parameter: movie_id =================================
+    id: 35384744721944495
+    identification: 
+      name: movie_id # 35247895971233912
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: Item
+      item: P3_ID
+
+- # ====== Region: Buttons =====================================
+  id: 35399723452944543
+  identification: 
+    name: Buttons
+    type: Static Content
+
+  layout: 
+    sequence: 20
+    parent-region: No Parent
+    slot: REGION_POSITION_01
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Buttons Container
+    template-options: 
+    - '#DEFAULT#'
+    - t-ButtonRegion--noUI
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: Text (escape special characters)
+      show-line-breaks: true
+
+- # ====== Region: Header ======================================
+  id: 35403516117955114
+  identification: 
+    name: Header
+    title: Header
+    type: Cards
+
+  source: 
+    location: REST Source
+    rest-source: Movie Details # 35247269302233910
+
+  local-post-processing: 
+    type: SQL Query
+    sql-query: |
+      select id,
+             title,
+             'https://image.tmdb.org/t/p/w500'||poster_path as poster_url,
+             'https://image.tmdb.org/t/p/w500'||backdrop_path as backdrop_url,
+             release_date,
+             runtime,
+             trunc(runtime/60) || 'hr ' ||
+                  extract (minute from numtodsinterval((runtime/60), 'HOUR' )) || 'min'
+                  as runtime_friendly,
+             vote_average,
+             tagline
+        from #APEX$SOURCE_DATA#
+
+  layout: 
+    sequence: 20
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Cards Container
+    template-options: 
+    - '#DEFAULT#'
+    - t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+    - t-CardsRegion--styleB
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  parameters: 
+  - # ====== Parameter: movie_id =================================
+    id: 35403784559955116
+    identification: 
+      name: movie_id # 35247895971233912
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: REST Source Default
+
+  attributes: 
+    id: 35403640419955115
+    appearance: 
+      layout: Horizontal (Row)
+      css-classes: 
+      - movie-header-card
+
+    card: 
+      primary-key-column-1: ID
+
+    title: 
+      advanced-formatting: false
+      column: TITLE
+
+    subtitle: 
+      advanced-formatting: true
+      html-expression: |
+        <div class="movie-details">
+            <span title="Release Date">Released &RELEASE_DATE.</span> &middot;
+            <span title="Runtime">&RUNTIME_FRIENDLY.</span> &middot;
+            <span title="&VOTE_AVERAGE. out of 10"><span class="fa fa-star" aria-hidden="true"></span> &VOTE_AVERAGE.</span>
+        </div>
+
+    body: 
+      advanced-formatting: false
+
+    secondary-body: 
+      advanced-formatting: false
+
+    icon-and-badge: 
+      icon-source: Image URL
+      image-url: '&POSTER_URL.'
+      icon-css-classes: w100 h150
+      icon-position: Start
+
+    media: 
+      advanced-formatting: false
+      source: URL Column
+      url-column: BACKDROP_URL
+      position: As Background Image
+      appearance: Auto
+      sizing: Cover
+
+    performance: 
+      lazy-loading: false
+
+    pagination: 
+      type: Scroll
+      show-total-count: false
+
+- # ====== Region: Overview ====================================
+  id: 35403815900955117
+  identification: 
+    name: Overview
+    type: Static Content
+
+  source: 
+    html-code: '&P3_OVERVIEW.'
+
+  layout: 
+    sequence: 30
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Content Block
+    template-options: 
+    - '#DEFAULT#'
+    - t-ContentBlock--h3
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: HTML
+      expand-shortcuts: false
+
+- # ====== Region: CAST ========================================
+  id: 35406089702955139
+  identification: 
+    name: CAST
+    type: Cards
+
+  source: 
+    location: REST Source
+    rest-source: Movie Cast # 35239736722233900
+
+  layout: 
+    sequence: 40
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Content Block
+    template-options: 
+    - '#DEFAULT#'
+    - t-ContentBlock--h1
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  parameters: 
+  - # ====== Parameter: movie_id =================================
+    id: 35406245106955141
+    identification: 
+      name: movie_id # 35240372137233903
+
+    operation: 
+      http-method: All
+      database-operation: All
+
+    parameter: 
+      direction: In
+      data-type: String
+
+    value: 
+      type: Item
+      item: P3_ID
+
+  attributes: 
+    id: 35406161218955140
+    appearance: 
+      layout: Grid
+      grid-columns: 5 Columns
+
+    card: 
+      primary-key-column-1: ID
+
+    title: 
+      advanced-formatting: false
+      column: CHARACTER
+
+    subtitle: 
+      advanced-formatting: false
+
+    body: 
+      advanced-formatting: false
+      column: NAME
+
+    secondary-body: 
+      advanced-formatting: false
+
+    icon-and-badge: 
+      icon-source: No Icon
+
+    media: 
+      advanced-formatting: false
+      source: Image URL
+      url: 'https://image.tmdb.org/t/p/w500&PROFILE_PATH.'
+      position: First
+      appearance: Square
+      sizing: Cover
+
+    performance: 
+      lazy-loading: false
+
+    pagination: 
+      type: Page
+      show-total-count: false
+      cards-per-page: 10
+
+page-items: 
+- # ====== Page Item: P3_ID ====================================
+  id: 35385088400944501
+  identification: 
+    name: P3_ID
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 10
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: ID
+    data-type: NUMBER
+    query-only: false
+    primary-key: true
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Checksum Required - Session Level
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_ADULT =================================
+  id: 35385444151944517
+  identification: 
+    name: P3_ADULT
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 20
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: ADULT
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TITLE =================================
+  id: 35385830479944518
+  identification: 
+    name: P3_TITLE
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 30
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: TITLE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_VIDEO =================================
+  id: 35386289782944520
+  identification: 
+    name: P3_VIDEO
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 40
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: VIDEO
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_BUDGET ================================
+  id: 35386641412944521
+  identification: 
+    name: P3_BUDGET
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 50
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: BUDGET
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_STATUS ================================
+  id: 35387015180944523
+  identification: 
+    name: P3_STATUS
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 60
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: STATUS
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_IMDB_ID ===============================
+  id: 35387434223944525
+  identification: 
+    name: P3_IMDB_ID
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 70
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: IMDB_ID
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_REVENUE ===============================
+  id: 35387812677944526
+  identification: 
+    name: P3_REVENUE
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 80
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: REVENUE
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_RUNTIME ===============================
+  id: 35388217367944526
+  identification: 
+    name: P3_RUNTIME
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 90
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: RUNTIME
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TAGLINE ===============================
+  id: 35388683032944528
+  identification: 
+    name: P3_TAGLINE
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 100
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: TAGLINE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_HOMEPAGE ==============================
+  id: 35389032606944528
+  identification: 
+    name: P3_HOMEPAGE
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 110
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: HOMEPAGE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_OVERVIEW ==============================
+  id: 35389420119944529
+  identification: 
+    name: P3_OVERVIEW
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 120
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: OVERVIEW
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_POPULARITY ============================
+  id: 35389879269944531
+  identification: 
+    name: P3_POPULARITY
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 130
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: POPULARITY
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_VOTE_COUNT ============================
+  id: 35390277670944531
+  identification: 
+    name: P3_VOTE_COUNT
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 140
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: VOTE_COUNT
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_POSTER_PATH ===========================
+  id: 35390658270944531
+  identification: 
+    name: P3_POSTER_PATH
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 150
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: POSTER_PATH
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_RELEASE_DATE ==========================
+  id: 35391031126944531
+  identification: 
+    name: P3_RELEASE_DATE
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 160
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: RELEASE_DATE
+    data-type: DATE
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_VOTE_AVERAGE ==========================
+  id: 35391402173944532
+  identification: 
+    name: P3_VOTE_AVERAGE
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 170
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: VOTE_AVERAGE
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_BACKDROP_PATH =========================
+  id: 35391891168944532
+  identification: 
+    name: P3_BACKDROP_PATH
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 180
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: BACKDROP_PATH
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_ORIGINAL_TITLE ========================
+  id: 35392202422944534
+  identification: 
+    name: P3_ORIGINAL_TITLE
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 190
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: ORIGINAL_TITLE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_ORIGINAL_LANGUAGE =====================
+  id: 35392665050944534
+  identification: 
+    name: P3_ORIGINAL_LANGUAGE
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 200
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: ORIGINAL_LANGUAGE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_BELONGS_TO_COLLECTION =================
+  id: 35393028036944534
+  identification: 
+    name: P3_BELONGS_TO_COLLECTION
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 210
+    region: Movie Details # 35384207287944478
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Movie Details # 35384207287944478
+    column: BELONGS_TO_COLLECTION
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_PREVIOUS_PAGE_ID ======================
+  id: 35405014429955129
+  identification: 
+    name: P3_PREVIOUS_PAGE_ID
+    type: Text Field
+
+  label: 
+    label: Previous Page Id
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 220
+    region: Movie Details # 35384207287944478
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: false
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    type: Null
+    used: Only when current value in session state is null
+
+  session-state: 
+    storage: Per Session (Persistent)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+buttons: 
+- # ====== Button: Back ========================================
+  id: 35400124066944543
+  identification: 
+    button-name: Back
+    label: Back
+
+  layout: 
+    sequence: 10
+    region: Buttons # 35399723452944543
+    slot: PREVIOUS
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text with Icon
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+    - t-Button--noUI
+    - t-Button--iconLeft
+    icon: fa-chevron-left
+
+  behavior: 
+    action: Redirect to Page in this Application
+    target: 
+      url: 'f?p=&APP_ID.:2:&SESSION.::&DEBUG.:::'
+      page: 2 # Movie Search
+
+    warn-on-unsaved-changes: Do Not Check
+
+- # ====== Button: Add_to_Watch_List ===========================
+  id: 35404460805955123
+  identification: 
+    button-name: Add_to_Watch_List
+    label: Add To Watch List
+
+  layout: 
+    sequence: 20
+    region: Buttons # 35399723452944543
+    slot: NEXT
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text with Icon
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+    - t-Button--iconLeft
+
+  behavior: 
+    action: Submit Page
+    execute-validations: true
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+    database-action: SQL INSERT action
+
+- # ====== Button: Remove_From_Watch_list ======================
+  id: 35404598740955124
+  identification: 
+    button-name: Remove_From_Watch_list
+    label: Remove From Watch List
+
+  layout: 
+    sequence: 10
+    region: Buttons # 35399723452944543
+    slot: NEXT
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Redirect to Page in this Application
+    target: 
+      url: 'f?p=&APP_ID.:2:&SESSION.::&DEBUG.:::'
+      page: 2 # Movie Search
+
+    warn-on-unsaved-changes: Do Not Check
+    database-action: SQL DELETE action
+
+- # ====== Button: Mark_Watched ================================
+  id: 35404689750955125
+  identification: 
+    button-name: Mark_Watched
+    label: i've watched This
+
+  layout: 
+    sequence: 10
+    region: Buttons # 35399723452944543
+    slot: NEXT
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Submit Page
+    execute-validations: true
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+    database-action: SQL UPDATE action
+
+processes: 
+- # ====== Process: Initialize form Movie Details ==============
+  id: 35401503138944551
+  identification: 
+    name: Initialize form Movie Details
+    type: Form - Initialization
+    execution-chain: None
+    form-region: Movie Details # 35384207287944478
+
+  execution: 
+    sequence: 10
+    point: Before Header
+    run-process: Once Per Page Visit (default)
+
+- # ====== Process: Add Movie ==================================
+  id: 35401966585944551
+  identification: 
+    name: Add Movie
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      insert into watchlist
+          (
+              movie_id,
+              user_id,
+              watched_yn,
+              title,
+              poster_url,
+              release_date,
+              runtime,
+              vote_average
+          )
+      values
+          (
+              :P3_ID,
+              :USER_ID,
+              'N',
+              :P3_TITLE,
+              'https://image.tmdb.org/t/p/w500'||:P3_POSTER_PATH,
+              :P3_RELEASE_DATE,
+              :P3_RUNTIME,
+              :P3_VOTE_AVERAGE
+          );
+
+  execution: 
+    sequence: 50
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+  server-side-condition: 
+    when-button-pressed: Add_to_Watch_List # 35404460805955123
+
+- # ====== Process: Remove Movie ===============================
+  id: 35404778089955126
+  identification: 
+    name: Remove Movie
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      delete from watchlist
+       where movie_id = :P3_ID
+         and user_id = :USER_ID;
+
+  execution: 
+    sequence: 60
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+  server-side-condition: 
+    when-button-pressed: Remove_From_Watch_list # 35404598740955124
+
+- # ====== Process: update Movie ===============================
+  id: 35404888378955127
+  identification: 
+    name: update Movie
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      update watchlist
+         set watched_yn = 'Y',
+             watched = SYSDATE
+       where movie_id = :P3_ID
+         and user_id = :USER_ID;
+
+  execution: 
+    sequence: 70
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+  server-side-condition: 
+    when-button-pressed: Mark_Watched # 35404689750955125
+
+- # ====== Process: New ========================================
+  id: 35405187419955130
+  identification: 
+    name: New
+    type: Close Dialog
+    execution-chain: None
+
+  settings: 
+    show-success-messages: true
+
+  execution: 
+    sequence: 80
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+  server-side-condition: 
+    when-button-pressed: Back # 35400124066944543
+
+branches: 
+- # ====== Branch: redirect to previous page ===================
+  id: 35404942527955128
+  identification: 
+    name: redirect to previous page
+
+  execution: 
+    sequence: 10
+    point: After Processing
+
+  behavior: 
+    type: Page or URL (Redirect)
+    target: 
+      url: 'f?p=&APP_ID.:2:&SESSION.::&DEBUG.:::&success_msg=#SUCCESS_MSG#'
+      page: 2 # Movie Search
+

@@ -1,0 +1,13 @@
+---
+- # ====== REST Data Source Server: api-themoviedb-org-3 =======
+  id: 35191402797903406
+  identification: 
+    name: api-themoviedb-org-3
+
+  endpoint-url: 
+    url: 'https://api.themoviedb.org/3/'
+
+  advanced: 
+    static-id: api_themoviedb_org_3
+    prompt-on-install: false
+

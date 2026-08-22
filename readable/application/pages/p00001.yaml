@@ -1,0 +1,690 @@
+---
+# ====== Page: Home ==========================================
+id: 1
+identification: 
+  name: Home
+  alias: HOME
+  title: SnoopyFilm
+
+appearance: 
+  page-mode: Normal
+  page-template: Left Side Column
+  template-options: 
+  - '#DEFAULT#'
+
+navigation-menu: 
+  override-user-interface-level: false
+
+navigation: 
+  cursor-focus: Do not focus cursor
+  warn-on-unsaved-changes: true
+
+css: 
+  inline: |
+    :root {
+        /* Updating movie title size to make it more prominent */
+        --a-cv-title-font-size: 24px;
+        --a-cv-title-line-height: 1.5;
+    }
+    
+        /* Update default width of images */
+        .a-CardView-items--row .has-media {
+        grid-template-columns: minmax(32px,128px) minmax(0,var(--a-cv-icon-spacer,44px)) 1fr minmax(0,auto);
+    }
+
+security: 
+  authentication: Page Requires Authentication
+  deep-linking: Application Default
+  page-access-protection: Arguments Must Have Checksum
+  form-auto-complete: Off
+  browser-cache: Application Default
+
+session-management: 
+  rejoin-sessions: Application Default
+
+advanced: 
+  enable-duplicate-page-submissions: Yes - Enable page to be re-posted
+  reload-on-submit: Only for Success
+
+server-cache: 
+  caching: Disabled
+
+regions: 
+- # ====== Region: SnoopyFilm ==================================
+  id: 35187337317852571
+  identification: 
+    name: SnoopyFilm
+    type: Static Content
+
+  layout: 
+    sequence: 10
+    parent-region: No Parent
+    slot: REGION_POSITION_01
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Hero
+    template-options: 
+    - '#DEFAULT#'
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  image: 
+    file-url: '#APP_FILES#icons/app-icon-512.png'
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: HTML
+      expand-shortcuts: false
+
+- # ====== Region: Watchlist ===================================
+  id: 35405236186955131
+  identification: 
+    name: Watchlist
+    type: Cards
+
+  source: 
+    location: Local Database
+    type: SQL Query
+    sql-query: |
+      select DISTINCT ID,
+              movie_id,
+             user_id,
+             watched_yn,
+             watched,
+             case when watched_yn = 'Y' then 'Watched' end as WATCHED_LABEL,
+             case when watched_yn = 'Y'
+                  then 'Marked as watched ' || apex_util.get_since(watched)
+                  else 'Added to watchlist ' || apex_util.get_since(created)
+                  end as movie_status,
+             title,
+             poster_url,
+             release_date,
+             to_char(release_date, 'YYYY') as release_year,
+             floor( to_char(release_date, 'YYYY') / 10) * 10 as decade,
+             runtime,
+             vote_average,
+             created,
+             to_char(created, 'MM/YYYY') as created_on,
+             created_by,
+             updated,
+             updated_by
+        from watchlist
+       where user_id = :USER_ID
+
+  order-by: 
+    type: None
+
+  layout: 
+    sequence: 10
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Cards Container
+    template-options: 
+    - '#DEFAULT#'
+    - t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    id: 35405366330955132
+    appearance: 
+      layout: Grid
+      grid-columns: Auto
+
+    card: 
+      primary-key-column-1: ID
+
+    title: 
+      advanced-formatting: false
+      column: TITLE
+
+    subtitle: 
+      advanced-formatting: false
+
+    body: 
+      advanced-formatting: true
+      html-expression: |
+        Release Year: &RELEASE_YEAR.
+        <br>
+        Rating: &VOTE_AVERAGE.
+
+    secondary-body: 
+      advanced-formatting: false
+      column: WATCHED_LABEL
+
+    icon-and-badge: 
+      icon-source: No Icon
+      badge-column: WATCHED_LABEL
+
+    media: 
+      advanced-formatting: false
+      source: URL Column
+      url-column: POSTER_URL
+      position: Body
+      appearance: Auto
+      sizing: Fit
+
+    performance: 
+      lazy-loading: false
+
+    pagination: 
+      type: Scroll
+      show-total-count: false
+
+    actions: 
+    - # ====== Action: Full Card ===================================
+      id: 35405463773955133
+      identification: 
+        type: Full Card
+
+      layout: 
+        sequence: 10
+
+      link: 
+        type: Redirect to Page in this Application
+        target: 
+          url: 'f?p=&APP_ID.:3:&SESSION.::&DEBUG.::P3_ID,P3_PREVIOUS_PAGE_ID:&MOVIE_ID.,1'
+          page: 3 # Movie Details
+          values: 
+            p3_id: '&MOVIE_ID.'
+            p3_previous_page_id: 1
+
+- # ====== Region: Filter ======================================
+  id: 35405572369955134
+  identification: 
+    name: Filter
+    type: Faceted Search
+
+  source: 
+    filtered-region: Watchlist # 35405236186955131
+
+  layout: 
+    sequence: 20
+    parent-region: No Parent
+    slot: REGION_POSITION_02
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Standard
+    template-options: 
+    - '#DEFAULT#'
+    - t-Region--scrollBody
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      batch-facet-changes: false
+      compact-numbers-threshold: 10000
+      show-current-facets: No
+      show-total-row-count: No
+      show-charts: Dialog
+      display-chart-for-top-n-values: 10
+
+  facets: 
+  - # ====== Facet: P1_SEARCH ====================================
+    id: 35405674192955135
+    identification: 
+      name: P1_SEARCH
+      type: Search
+
+    label: 
+      label: Search
+
+    settings: 
+      search-type: Row Search
+      input-field: Top of Faceted Search Region
+
+    layout: 
+      sequence: 10
+
+    source: 
+      database-column(s): TITLE
+
+    security: 
+      store-value-encrypted-in-session-state: true
+
+  - # ====== Facet: P1_WATCHED_YN ================================
+    id: 35405797204955136
+    identification: 
+      name: P1_WATCHED_YN
+      type: Checkbox Group
+
+    label: 
+      label: Watched
+      show-label-for-current-facet: true
+
+    layout: 
+      sequence: 20
+
+    appearance: 
+      display: Inline
+
+    list-of-values: 
+      type: Static Values
+      static-values: 'STATIC2:Yes;Y,No;N'
+      include-null-option: false
+
+    list-entries: 
+      compute-counts: true
+      show-counts: true
+      zero-count-entries: Hide
+      sort-by-top-counts: true
+      show-selected-first: false
+      maximum-displayed-entries: 7
+      display-filter-initially: false
+
+    actions-menu: 
+      filter: false
+      chart: false
+
+    advanced: 
+      collapsible: false
+
+    source: 
+      database-column: WATCHED_YN
+      data-type: VARCHAR2
+
+    multiple-values: 
+      type: No
+
+    security: 
+      store-value-encrypted-in-session-state: true
+      escape-special-characters: true
+
+  - # ====== Facet: P1_DECADE ====================================
+    id: 35405863599955137
+    identification: 
+      name: P1_DECADE
+      type: Checkbox Group
+
+    label: 
+      label: Decade
+      show-label-for-current-facet: true
+
+    layout: 
+      sequence: 30
+
+    appearance: 
+      display: Inline
+
+    list-of-values: 
+      type: Distinct Values
+      sort-direction: Ascending
+      include-null-option: false
+
+    list-entries: 
+      compute-counts: true
+      show-counts: true
+      zero-count-entries: Hide
+      sort-by-top-counts: false
+      show-selected-first: false
+      maximum-displayed-entries: 7
+      display-filter-initially: false
+
+    actions-menu: 
+      filter: false
+      chart: false
+
+    advanced: 
+      collapsible: false
+
+    source: 
+      database-column: DECADE
+      data-type: NUMBER
+
+    multiple-values: 
+      type: No
+
+    security: 
+      store-value-encrypted-in-session-state: true
+      escape-special-characters: true
+
+  - # ====== Facet: P1_RUNTIME ===================================
+    id: 35405913650955138
+    identification: 
+      name: P1_RUNTIME
+      type: Range
+
+    label: 
+      label: Runtime
+      show-label-for-current-facet: true
+
+    settings: 
+      select-multiple: false
+      manual-entry: false
+
+    layout: 
+      sequence: 40
+
+    appearance: 
+      display: Inline
+
+    list-of-values: 
+      type: Static Values
+      static-values: 'STATIC2:Over 2 hours;120|,90 minutes to 2 hours;90|120,Less than 90 minutes;|90'
+
+    list-entries: 
+      compute-counts: true
+      show-counts: true
+      zero-count-entries: Hide
+      show-selected-first: false
+      maximum-displayed-entries: 7
+      display-filter-initially: false
+
+    actions-menu: 
+      filter: false
+      chart: false
+
+    advanced: 
+      collapsible: false
+
+    source: 
+      database-column: RUNTIME
+      data-type: NUMBER
+
+    security: 
+      store-value-encrypted-in-session-state: true
+
+  filters: 
+  - # ====== Filter: P1_SEARCH ===================================
+    id: 35405674192955135
+    identification: 
+      name: P1_SEARCH
+      type: Search
+
+    label: 
+      label: Search
+
+    settings: 
+      search-type: Row Search
+      collapsed-search-field: false
+
+    layout: 
+      sequence: 10
+
+    source: 
+      database-column(s): TITLE
+
+    security: 
+      store-value-encrypted-in-session-state: true
+
+  - # ====== Filter: P1_WATCHED_YN ===============================
+    id: 35405797204955136
+    identification: 
+      name: P1_WATCHED_YN
+      type: Checkbox Group
+
+    label: 
+      label: Watched
+
+    layout: 
+      sequence: 20
+
+    list-of-values: 
+      type: Static Values
+      static-values: 'STATIC2:Yes;Y,No;N'
+      include-null-option: false
+
+    list-entries: 
+      compute-counts: true
+      show-counts: true
+      zero-count-entries: Hide
+      sort-by-top-counts: true
+      show-selected-first: false
+      client-side-filtering: false
+
+    suggestions: 
+      type: None
+
+    source: 
+      database-column: WATCHED_YN
+      data-type: VARCHAR2
+
+    multiple-values: 
+      type: No
+
+    security: 
+      store-value-encrypted-in-session-state: true
+      escape-special-characters: true
+
+  - # ====== Filter: P1_DECADE ===================================
+    id: 35405863599955137
+    identification: 
+      name: P1_DECADE
+      type: Checkbox Group
+
+    label: 
+      label: Decade
+
+    layout: 
+      sequence: 30
+
+    list-of-values: 
+      type: Distinct Values
+      sort-direction: Ascending
+      include-null-option: false
+
+    list-entries: 
+      compute-counts: true
+      show-counts: true
+      zero-count-entries: Hide
+      sort-by-top-counts: false
+      show-selected-first: false
+      client-side-filtering: false
+
+    suggestions: 
+      type: None
+
+    source: 
+      database-column: DECADE
+      data-type: NUMBER
+
+    multiple-values: 
+      type: No
+
+    security: 
+      store-value-encrypted-in-session-state: true
+      escape-special-characters: true
+
+  - # ====== Filter: P1_RUNTIME ==================================
+    id: 35405913650955138
+    identification: 
+      name: P1_RUNTIME
+      type: Range
+
+    label: 
+      label: Runtime
+
+    settings: 
+      select-multiple: false
+      manual-entry: false
+
+    layout: 
+      sequence: 40
+
+    list-of-values: 
+      type: Static Values
+      static-values: 'STATIC2:Over 2 hours;120|,90 minutes to 2 hours;90|120,Less than 90 minutes;|90'
+
+    list-entries: 
+      compute-counts: true
+      show-counts: true
+      zero-count-entries: Hide
+      show-selected-first: false
+      client-side-filtering: false
+
+    suggestions: 
+      type: None
+
+    source: 
+      database-column: RUNTIME
+      data-type: NUMBER
+
+    security: 
+      store-value-encrypted-in-session-state: true
+
+- # ====== Region: Get Started =================================
+  id: 35406387068955142
+  identification: 
+    name: Get Started
+    title: Get Started
+    type: Static Content
+
+  source: 
+    html-code: |
+      <strong>Welcome to your Watchlist!</strong>
+      <br>
+      <br>
+      To search for movies and add them to your list, click on the <strong>Add a Movie</strong> button above.
+
+  layout: 
+    sequence: 10
+    parent-region: Watchlist # 35405236186955131
+    slot: SUB_REGIONS
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Standard
+    template-options: 
+    - '#DEFAULT#'
+    - t-Region--scrollBody
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  server-side-condition: 
+    type: No Rows returned
+    sql-query: |
+      select null
+        from watchlist
+       where user_id = :USER_ID
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: HTML
+      expand-shortcuts: false
+
+buttons: 
+- # ====== Button: ADD_MOVIE ===================================
+  id: 34973072169057935
+  identification: 
+    button-name: ADD_MOVIE
+    label: Add Movie
+
+  layout: 
+    sequence: 10
+    region: SnoopyFilm # 35187337317852571
+    slot: NEXT
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text with Icon
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+    - t-Button--iconLeft
+
+  behavior: 
+    action: Redirect to Page in this Application
+    target: 
+      url: 'f?p=&APP_ID.:2:&SESSION.::&DEBUG.:2::'
+      page: 2 # Movie Search
+      clear-cache: 2
+
+    warn-on-unsaved-changes: Do Not Check
+
+dynamic-actions: 
+- # ====== Dynamic Action: Refresh on Dialog Closed ============
+  id: 34973187702057936
+  identification: 
+    name: Refresh on Dialog Closed
+
+  execution: 
+    sequence: 10
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Dialog Closed or Canceled
+    selection-type: Button
+    button: ADD_MOVIE # 34973072169057935
+
+  actions: 
+  - # ====== Action: Submit Page =================================
+    id: 34973241880057937
+    identification: 
+      action: Submit Page
+
+    settings: 
+      show-processing: true
+
+    execution: 
+      sequence: 10
+      event: Refresh on Dialog Closed # 34973187702057936
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+

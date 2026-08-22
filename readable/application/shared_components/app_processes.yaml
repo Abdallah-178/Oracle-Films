@@ -1,0 +1,39 @@
+---
+- # ====== Application Process: Add User =======================
+  id: 35431777471670996
+  identification: 
+    name: Add User
+    type: NATIVE_PLSQL
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      -- create movie user ID
+      -- query movie_users table to check for existing user
+      -- if yes, return PK as user_id
+      -- if no, add new user to movie_users
+      declare
+          l_user_id number;
+      begin
+          select id into l_user_id from movie_users where username = :APP_USER;
+      
+          :USER_ID := l_user_id;
+      
+          exception
+              when no_data_found then
+              insert into movie_users
+                      (username)
+                  values
+                      (:APP_USER)
+                  returning
+                      id into :USER_ID;
+      end;
+
+  execution: 
+    sequence: 1
+    point: After Authentication
+
+  subscription: 
+    version-number: 72374368
+
